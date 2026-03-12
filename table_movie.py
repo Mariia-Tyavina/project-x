@@ -131,24 +131,69 @@ class MovieManager:
             
             return movies
         
-
 if __name__ == "__main__":
     manager = MovieManager("test_movies.db")
-    # user_title = str(input("Название: "))
-    # user_year = int(input("Год выпуска: ")) 
-    # user_director = str(input("Режиссер: ")) 
-    # user_description = str(input("Описание: ")) 
-    # user_rating = float(input("Рейтинг: "))
-    # user_tags = str(input("Теги: "))
+    print(manager.search_by_tags(["триллер"]))
+    def print_menu():
+        print("МЕНЕДЖЕР ФИЛЬМОВ")
+        print("1. Добавить фильм вручную")
+        print("2. Добавить несколько фильмов подряд")
+        print("3. Поиск фильма по тегу")
+        print("4. Показать все фильмы")
+        print("5. Выход")
+        
     
-    # manager.add_movie(
-    #     title=user_title,
-    #     year=user_year,
-    #     director=user_director,
-    #     description=user_description,
-    #     rating=user_rating,
-    #     tags=user_tags.split()
-    # )    
-    print(manager.search_by_tags(['драма', 'триллер'], match_all=False))
+    while True:
+        print_menu()
+        choice = input("Выберите действие (1-5): ")
 
-                           
+        if choice == "1":
+            title = input("Название: ")
+            year = int(input("Год: "))
+            director = input("Режиссер: ")
+            description = input("Описание: ")
+            rating = float(input("Рейтинг: "))
+            tags = input("Теги(через пробел): ").split().lower()
+            manager.add_movie(title, year, director, description, rating, tags)
+        
+        
+        elif choice == "2":
+            while True:
+                print("\n Введите пустое название для выхода")
+                title = input("Название: ")
+                if not title:
+                    break
+                
+                year = int(input("Год: "))
+                director = input("Режиссер: ")
+                description = input("Описание: ")
+                rating = float(input("Рейтинг: "))
+                tags = input("Теги(через пробел): ").split().lower()
+                manager.add_movie(title, year, director, description, rating, tags)
+        
+        elif choice == "3":
+            tag = input("Введите тег для поиска: ").strip().lower()
+            result = manager.search_by_tags([tag], match_all=False)
+            
+            if result:
+                print("Найдено фильмов: ", len(result), "\n")
+                for i, movie in enumerate(result, 1):
+                    print(f'{i}. Название:{movie["title"]}')
+                    print(f'Режиссер:{movie["director"]}')
+                    print(f'Описание:{movie["description"]}')
+                    print(f'Рейтинг: {movie["rating"]}')
+                    print(f"Теги: {', '.join(movie["tags"])}")
+            else:
+                print("К сожалению, ничего не найдено")
+        
+        elif choice == "4":
+            print("Функция в разработке...")
+        
+        elif choice == "6":
+            print("До встречи.")
+            break
+        
+        else:
+            print("Такой команды нет")
+        
+        input("\nНажми Enter, чтобы продолжить...")
