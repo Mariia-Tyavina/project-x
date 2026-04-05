@@ -1,5 +1,10 @@
 import sqlite3
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict
+from tmdbv3api import TMDb, Movie
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 class MovieManager:
     
@@ -107,11 +112,53 @@ class MovieManager:
                 movie['tags'] = [row[0] for row in cursor.fetchall()]
             
             return movies
+    
+    def get_all_movies(self) -> List[Dict]:
+        with sqlite3.connect(self.db_file) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT * FROM movies 
+                ORDER BY rating DESC
+            """)
+            
+            movies = [dict(row) for row in cursor.fetchall()]
+
+            for movie in movies:
+                cursor.execute("""
+                    SELECT t.name
+                    FROM tags t
+                    JOIN movie_tags mt ON t.id = mt.tag_id
+                    WHERE mt.movie_id = ?
+                """, (movie['id'],))
+                movie['tags'] = [row[0] for row in cursor.fetchall()]
+            
+            return movies
+    
+    def show_all_movies(self):
+        movies = self.get_all_movies()
         
+        if not movies:
+            print("\n База фильмов пуста!")
+            print("Добавьте первый фильм через пункт меню 1.")
+            return
+        
+        print("\n" + "="*70)
+        print(f"ВСЕ ФИЛЬМЫ В БАЗЕ (всего: {len(movies)})")
+        print("\n" + "="*70)
+        
+        for i, movie in enumerate(movies, 1):
+            print(f"\n  ФИЛЬМ #{i}")
+            print(f"   Название: {movie['title']} ({movie['year']})")
+            print(f"   Режиссер: {movie['director']}")
+            print(f"   Рейтинг: {movie['rating']}/10")
+            print(f"   Теги: {', '.join(movie['tags'])}")
+            print(f"   Описание: {movie['description']}")
+            print("\n" + "="*70)
 
 if __name__ == "__main__":
-    manager = MovieManager("test_movies.db")
-    print(manager.search_by_tags(["триллер"]))
+    manager = MovieManager("table_of_movies.db")
     def print_menu():
         print("МЕНЕДЖЕР ФИЛЬМОВ")
         print("1. Добавить фильм вручную")
@@ -130,8 +177,8 @@ if __name__ == "__main__":
             year = int(input("Год: "))
             director = input("Режиссер: ")
             description = input("Описание: ")
-            rating = float(input("Рейтинг: "))
-            tags = input("Теги(через пробел): ").split().lower()
+            rating = float(input("Рейтинг: ").replace(",", '.'))
+            tags = input("Теги (через пробел): ").lower().split()
             manager.add_movie(title, year, director, description, rating, tags)
         
         
@@ -145,8 +192,8 @@ if __name__ == "__main__":
                 year = int(input("Год: "))
                 director = input("Режиссер: ")
                 description = input("Описание: ")
-                rating = float(input("Рейтинг: "))
-                tags = input("Теги(через пробел): ").split().lower()
+                rating = float(input("Рейтинг: ").replace(",", '.'))
+                tags = input("Теги (через пробел): ").lower().split()
                 manager.add_movie(title, year, director, description, rating, tags)
         
         elif choice == "3":
@@ -165,9 +212,9 @@ if __name__ == "__main__":
                 print("К сожалению, ничего не найдено")
         
         elif choice == "4":
-            print("Функция в разработке...")
+            manager.show_all_movies()
         
-        elif choice == "6":
+        elif choice == "5":
             print("До встречи.")
             break
         
@@ -175,3 +222,4 @@ if __name__ == "__main__":
             print("Такой команды нет")
         
         input("\nНажми Enter, чтобы продолжить...")
+        print()
