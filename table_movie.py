@@ -1,6 +1,6 @@
 import sqlite3
 from typing import List, Dict
-from tmdbv3api import TMDb, Movie
+import requests
 from dotenv import load_dotenv
 import os
 
@@ -136,6 +136,16 @@ class MovieManager:
             
             return movies
     
+    def movie_exists(self, title: str, year: int) -> bool:
+        with sqlite3.connect(self.db_file) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id FROM movies 
+                WHERE title = ? AND year = ?
+            """, (title, year))
+            return cursor.fetchone() is not None
+    
+    
     def show_all_movies(self):
         movies = self.get_all_movies()
         
@@ -156,6 +166,63 @@ class MovieManager:
             print(f"   Теги: {', '.join(movie['tags'])}")
             print(f"   Описание: {movie['description']}")
             print("\n" + "="*70)
+           
+    def search_by_tmdb(self, searching: str):
+        API_KEY = os.getenv('TMDB_API')
+        
+        try:
+            search_url = "https://api.themoviedb.org/3/search/movie"
+            params = {"api_key": API_KEY, "query": searching, "language": "ru-RU"}
+            response = requests.get(search_url, params=params)
+            results = response.json().get('results', [])
+            
+            if not results:
+                print("Ничего не найдено")
+                return False
+        
+            movie = results[0]
+            movie_id = movie['id']
+            
+            details_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
+            params = {"api_key": API_KEY, "language": "ru-RU", "append_to_response": "credits"}
+            response = requests.get(details_url, params=params)
+            full_info = response.json()
+            
+            director = "Не указан"
+            for crew in full_info.get('credits', {}).get('crew', []):
+                if crew.get('job') == 'Director':
+                    director = crew.get('name')
+                    break
+            
+            tags = [genre['name'].lower() for genre in full_info.get('genres', [])]
+            
+            year = 0
+            if full_info.get('release_date'):
+                year = int(full_info['release_date'][:4])
+            
+            if self.movie_exists(full_info['title'], year):
+                print(f"Фильм уже есть в базе!")
+                return False
+            
+            self.add_movie(
+                title=full_info['title'],
+                year=year,
+                director=director,
+                description=full_info.get('overview', 'Нет описания')[:500],
+                rating=full_info.get('vote_average', 0),
+                tags=tags
+            )
+            
+            print(f"\nФильм добавлен!")
+            print(f"  Название: {full_info['title']}")
+            print(f"  Режиссёр: {director}")
+            print(f"  Теги: {', '.join(tags)}")
+            return True
+        
+        except:
+            print("Ошибка:")
+            return False
+         
 
 if __name__ == "__main__":
     manager = MovieManager("table_of_movies.db")
@@ -163,9 +230,10 @@ if __name__ == "__main__":
         print("МЕНЕДЖЕР ФИЛЬМОВ")
         print("1. Добавить фильм вручную")
         print("2. Добавить несколько фильмов подряд")
-        print("3. Поиск фильма по тегу")
-        print("4. Показать все фильмы")
-        print("5. Выход")
+        print("3. Добавить фильм автоматически")
+        print("4. Поиск фильма по тегу")
+        print("5. Показать все фильмы")
+        print("6. Выход")
         
     
     while True:
@@ -197,6 +265,15 @@ if __name__ == "__main__":
                 manager.add_movie(title, year, director, description, rating, tags)
         
         elif choice == "3":
+            while True:
+                print("\n Введите пустое название для выхода")
+                title = input("Название: ")
+                if not title:
+                    break
+                manager.search_by_tmdb(title)
+            
+        
+        elif choice == "4":
             tag = input("Введите тег для поиска: ").strip().lower()
             result = manager.search_by_tags([tag], match_all=False)
             
@@ -211,10 +288,10 @@ if __name__ == "__main__":
             else:
                 print("К сожалению, ничего не найдено")
         
-        elif choice == "4":
+        elif choice == "5":
             manager.show_all_movies()
         
-        elif choice == "5":
+        elif choice == "6":
             print("До встречи.")
             break
         
