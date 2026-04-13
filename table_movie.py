@@ -112,7 +112,7 @@ class MovieManager:
                 movie['tags'] = [row[0] for row in cursor.fetchall()]
             
             return movies
-    
+       
     def get_all_movies(self) -> List[Dict]:
         with sqlite3.connect(self.db_file) as conn:
             conn.row_factory = sqlite3.Row
@@ -280,11 +280,13 @@ if __name__ == "__main__":
             if result:
                 print("Найдено фильмов: ", len(result), "\n")
                 for i, movie in enumerate(result, 1):
+                    print("-"*50)
                     print(f'{i}. Название:{movie["title"]}')
                     print(f'Режиссер:{movie["director"]}')
                     print(f'Описание:{movie["description"]}')
                     print(f'Рейтинг: {movie["rating"]}')
                     print(f"Теги: {', '.join(movie["tags"])}")
+                    print("-"*50)
             else:
                 print("К сожалению, ничего не найдено")
         
