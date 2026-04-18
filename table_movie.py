@@ -4,14 +4,18 @@ import requests
 from dotenv import load_dotenv
 import os
 
+
 load_dotenv()
+
 
 class MovieManager:
     
+
     def __init__(self, db_file: str = "movies.db"):
         self.db_file = db_file
         self.init_database()
     
+
     def init_database(self):
         with sqlite3.connect(self.db_file) as conn:
             cursor = conn.cursor()
@@ -45,6 +49,7 @@ class MovieManager:
                             """)
             conn.commit()
             
+
     def add_movie(self, title: str, year: int, director: str, 
               description: str, rating: float, tags: List[str]):
         with sqlite3.connect(self.db_file) as conn:
@@ -58,8 +63,10 @@ class MovieManager:
             movie_id = cursor.lastrowid
             
             for tag_name in tags:
-                cursor.execute("INSERT OR IGNORE INTO tags (name) VALUES (?)", (tag_name,))
-                cursor.execute("SELECT id FROM tags WHERE name = ?", (tag_name,))
+                cursor.execute("INSERT OR IGNORE INTO tags (name) VALUES (?)",
+                                (tag_name,))
+                cursor.execute("SELECT id FROM tags WHERE name = ?",
+                                (tag_name,))
                 tag_id = cursor.fetchone()[0]
             
                 cursor.execute("""
@@ -70,7 +77,9 @@ class MovieManager:
             conn.commit()
             print(f"Фильм '{title}' добавлен")
     
-    def search_by_tags(self, tags: List[str], match_all: bool = False) -> List[Dict]:
+
+    def search_by_tags(self, tags: List[str], 
+                       match_all: bool = False) -> List[Dict]:
         with sqlite3.connect(self.db_file) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
@@ -113,6 +122,7 @@ class MovieManager:
             
             return movies
        
+
     def get_all_movies(self) -> List[Dict]:
         with sqlite3.connect(self.db_file) as conn:
             conn.row_factory = sqlite3.Row
@@ -136,6 +146,7 @@ class MovieManager:
             
             return movies
     
+
     def movie_exists(self, title: str, year: int) -> bool:
         with sqlite3.connect(self.db_file) as conn:
             cursor = conn.cursor()
@@ -167,12 +178,14 @@ class MovieManager:
             print(f"   Описание: {movie['description']}")
             print("\n" + "="*70)
            
+
     def search_by_tmdb(self, searching: str):
         API_KEY = os.getenv('TMDB_API')
         
         try:
             search_url = "https://api.themoviedb.org/3/search/movie"
-            params = {"api_key": API_KEY, "query": searching, "language": "ru-RU"}
+            params = {"api_key": API_KEY, "query": searching,
+                       "language": "ru-RU"}
             response = requests.get(search_url, params=params)
             results = response.json().get('results', [])
             
@@ -184,7 +197,8 @@ class MovieManager:
             movie_id = movie['id']
             
             details_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
-            params = {"api_key": API_KEY, "language": "ru-RU", "append_to_response": "credits"}
+            params = {"api_key": API_KEY,
+                       "language": "ru-RU", "append_to_response": "credits"}
             response = requests.get(details_url, params=params)
             full_info = response.json()
             
@@ -194,7 +208,8 @@ class MovieManager:
                     director = crew.get('name')
                     break
             
-            tags = [genre['name'].lower() for genre in full_info.get('genres', [])]
+            tags = [genre['name'].lower() for genre in 
+                    full_info.get('genres', [])]
             
             year = 0
             if full_info.get('release_date'):
@@ -247,7 +262,8 @@ if __name__ == "__main__":
             description = input("Описание: ")
             rating = float(input("Рейтинг: ").replace(",", '.'))
             tags = input("Теги (через пробел): ").lower().split()
-            manager.add_movie(title, year, director, description, rating, tags)
+            manager.add_movie(title, year, director,
+                               description, rating, tags)
         
         
         elif choice == "2":
@@ -262,7 +278,8 @@ if __name__ == "__main__":
                 description = input("Описание: ")
                 rating = float(input("Рейтинг: ").replace(",", '.'))
                 tags = input("Теги (через пробел): ").lower().split()
-                manager.add_movie(title, year, director, description, rating, tags)
+                manager.add_movie(title, year, director,
+                                   description, rating, tags)
         
         elif choice == "3":
             while True:
