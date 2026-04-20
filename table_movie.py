@@ -3,9 +3,13 @@ from typing import List, Dict
 import requests
 from dotenv import load_dotenv
 import os
+import numpy as np
+import faiss
+from sentence_transformers import SentenceTransformer
 
 
 load_dotenv()
+model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 
 
 class MovieManager:
@@ -237,7 +241,82 @@ class MovieManager:
         except:
             print("Ошибка:")
             return False
-         
+        
+    def create_search_index(self):
+        all_movies = self.get_all_movies()
+        if not all_movies:
+            print("В базе нет фильмов! Сначала добавьте фильмы.")
+            return
+        descriptions = []
+        movie_ids = []
+        for movie in all_movies:
+            description = movie.get("description", '')
+            if not description or description == "Нет описания":
+                description = movie.get('title', '')
+            descriptions.append(description)
+            movie_ids.append(movie['id'])
+        description_embeddings = model.encode(descriptions, show_progress_bar=True)
+        vector_dimension = description_embeddings.shape[1]
+        index = faiss.IndexFlatIP(vector_dimension)
+        index_with_ids = faiss.IndexIDMap(index)
+        faiss.normalize_L2(description_embeddings)
+        index_with_ids.add_with_ids(description_embeddings, np.array(movie_ids))
+        index_filename = "movie_search.index"
+        faiss.write_index(index_with_ids, index_filename)
+        
+    def search_by_index(self, query: str, amount = 5):
+        index_filename = "movie_search.index"
+    
+        if not os.path.exists(index_filename):
+            print("Поисковый индекс не найден!")
+            return []
+        
+        index_with_ids = faiss.read_index(index_filename)
+        query_embedding = model.encode([query])
+        faiss.normalize_L2(query_embedding)
+        distances, indices = index_with_ids.search(query_embedding, amount)
+        
+        if indices is None or len(indices) == 0 or len(indices[0]) == 0:
+            print("Ничего не найдено")
+            return []
+        
+        found_ids = indices[0].tolist()
+        found_distances = distances[0].tolist()
+        all_movies = self.get_all_movies()
+        movies_by_id = {movie['id']: movie for movie in all_movies}
+        results = []
+        for movie_id, distance in zip(found_ids, found_distances):
+            if movie_id in movies_by_id:
+                movie = movies_by_id[movie_id].copy()
+                movie['similarity_score'] = round(distance, 3)  # добавляем оценку похожести
+                results.append(movie)
+        
+        return results
+    
+    def show_index_results(self, results: list, query: str):        
+        if not results:
+            print(f"\nПо запросу '{query}' ничего не найдено")
+            return
+        
+        print(f"\n{'='*60}")
+        print(f"РЕЗУЛЬТАТЫ ПОИСКА ПО ЗАПРОСУ: '{query}'")
+        print(f"{'='*60}")
+        
+        for i, movie in enumerate(results, 1):
+            score = movie.get('similarity_score', 0)
+            similarity_percent = int(score * 100)
+            
+            print(f"\nРЕЗУЛЬТАТ #{i} (совпадение: {similarity_percent}%)")
+            print(f"Название: {movie['title']} ({movie['year']})")
+            print(f"Режиссёр: {movie['director']}")
+            print(f"Рейтинг: {movie['rating']}/10")
+            print(f"Теги: {', '.join(movie['tags'])}")
+            
+            description = movie.get('description', '')
+            if description and description != "Нет описания":
+                print(f"Описание: {description[:150]}...")
+            print(f"   {'-'*60}")
+        
 
 if __name__ == "__main__":
     manager = MovieManager("table_of_movies.db")
@@ -248,7 +327,8 @@ if __name__ == "__main__":
         print("3. Добавить фильм автоматически")
         print("4. Поиск фильма по тегу")
         print("5. Показать все фильмы")
-        print("6. Выход")
+        print("6. Поиск фильма по описанию")
+        print("7. Выход")
         
     
     while True:
@@ -311,6 +391,14 @@ if __name__ == "__main__":
             manager.show_all_movies()
         
         elif choice == "6":
+            query = input("Опишите, что хотите посмотреть: ").strip()
+            if query:
+                results = manager.search_by_index(query, amount=5)
+                manager.show_index_results(results, query)
+            else:
+                print("Запрос не может быть пустым")
+        
+        elif choice == "7":
             print("До встречи.")
             break
         
