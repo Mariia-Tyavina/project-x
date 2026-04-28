@@ -320,6 +320,7 @@ class MovieManager:
 
 if __name__ == "__main__":
     manager = MovieManager("table_of_movies.db")
+    manager.create_search_index()
     def print_menu():
         print("МЕНЕДЖЕР ФИЛЬМОВ")
         print("1. Добавить фильм вручную")
