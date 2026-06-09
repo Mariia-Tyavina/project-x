@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Менеджер фильмов и цветов{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+        }
+        header h1 {
+            margin-bottom: 10px;
+        }
+        nav {
+            background: #f8f9fa;
+            padding: 12px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        nav a {
+            text-decoration: none;
+            color: #495057;
+            margin-right: 20px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav a:hover {
+            color: #667eea;
+        }
+        main {
+            padding: 30px;
+        }
+        .flash {
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .flash.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .flash.danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .flash.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.1s ease;
+        }
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .tag {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            color: #495057;
+        }
+        button, .button {
+            background-color: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        button:hover, .button:hover {
+            background-color: #5a67d8;
+        }
+        form label {
+            display: inline-block;
+            width: 120px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        form input, form textarea, form select {
+            padding: 8px 12px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #e0e0e0;
+        }
+        .movie-title, .color-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        .rating {
+            background: #fbbf24;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+        a {
+            color: #667eea;
+        }
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: #6c757d;
+            font-size: 0.8rem;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🎬🎨 Медиа‑менеджер</h1>
+        <p>Фильмы + Цвета — всё в одном месте</p>
+    </header>
+    <nav>
+        <a href="{{ url_for('index') }}">🏠 Главная</a>
+        <a href="{{ url_for('movies_list') }}">🎥 Фильмы</a>
+        <a href="{{ url_for('colors_list') }}">🎨 Цвета</a>
+    </nav>
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+</div>
+</body>
+</html>

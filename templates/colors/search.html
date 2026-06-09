@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Поиск цветов по тегу{% endblock %}
+{% block content %}
+<h2>🔍 Поиск цветов по тегу</h2>
+<form method="POST">
+    <label>Тег:</label> <input type="text" name="tag" placeholder="например: теплый" required><br>
+    <button type="submit">Найти</button>
+</form>
+<p><a href="{{ url_for('colors_list') }}">← Назад</a></p>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Результаты поиска{% endblock %}
+{% block content %}
+<h2>Результаты поиска по запросу: "{{ query }}"</h2>
+{% if results %}
+    <p>Найдено фильмов: {{ results|length }}</p>
+    {% for movie in results %}
+    <div class="card">
+        <div class="movie-title">{{ movie.title }} ({{ movie.year }})</div>
+        <div>🎬 Режиссёр: {{ movie.director }}</div>
+        <div>⭐ Рейтинг: <span class="rating">{{ movie.rating }}</span>/10</div>
+        {% if movie.similarity_score %}
+        <div>🎯 Сходство с запросом: {{ "%.0f"|format(movie.similarity_score * 100) }}%</div>
+        {% endif %}
+        <div>
+            🏷️ Теги:
+            {% for t in movie.tags %}
+                <span class="tag">{{ t }}</span>
+            {% endfor %}
+        </div>
+        <div class="movie-description">{{ movie.description }}</div>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>Ничего не найдено. Попробуйте другие ключевые слова или теги.</p>
+{% endif %}
+<p><a href="{{ url_for('movies_list') }}">← На главную фильмов</a> | <a href="javascript:history.back()">← Вернуться к форме поиска</a></p>
+{% endblock %}

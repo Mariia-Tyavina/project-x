@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Все фильмы{% endblock %}
+{% block content %}
+<h2>🎬 Все фильмы ({{ movies|length }})</h2>
+<div style="margin-bottom: 20px;">
+    <a href="{{ url_for('movies_add_manual') }}" class="button">➕ Добавить вручную</a>
+    <a href="{{ url_for('movies_add_tmdb') }}" class="button" style="background: #38a169;">🌐 Добавить из TMDB</a>
+    <a href="{{ url_for('movies_search_tags') }}" class="button">🏷️ Поиск по тегам</a>
+    <a href="{{ url_for('movies_search_desc') }}" class="button">🔍 Поиск по описанию</a>
+</div>
+<hr>
+{% if movies %}
+    {% for movie in movies %}
+    <div class="card">
+        <div class="movie-title">{{ movie.title }} <span style="font-size: 0.9rem; color: #718096;">({{ movie.year }})</span></div>
+        <div>🎬 Режиссёр: {{ movie.director }}</div>
+        <div>⭐ Рейтинг: <span class="rating">{{ movie.rating }}</span>/10</div>
+        <div>
+            🏷️ Теги:
+            {% for t in movie.tags %}
+                <span class="tag">{{ t }}</span>
+            {% endfor %}
+        </div>
+        <div class="movie-description" style="margin-top: 12px;">{{ movie.description }}</div>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>База фильмов пуста. Добавьте первый фильм через кнопки выше.</p>
+{% endif %}
+{% endblock %}

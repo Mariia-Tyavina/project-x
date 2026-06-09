@@ -2,7 +2,7 @@ import sqlite3
 from typing import List
 
 
-connect = sqlite3.connect('table_of_colors.db')
+connect = sqlite3.connect('table_of_colors.db', check_same_thread=False)
 cursor = connect.cursor()
 
 
@@ -63,7 +63,35 @@ def submit(color: str, tags: List[str]):
     
     connect.commit()
 
-while True:
-    color = input("Введите цвет: ")
-    tags = input("Теги (через пробел): ").lower().split()
-    submit(color,tags)
+def get_all_colors() -> List[Dict]:
+    """Возвращает все цвета с их тегами"""
+    cursor.execute("SELECT id, name FROM colors ORDER BY name")
+    colors = []
+    for color_id, name in cursor.fetchall():
+        cursor.execute("""
+            SELECT t.tags FROM tags t
+            JOIN color_tags ct ON t.id = ct.tag_id
+            WHERE ct.color_id = ?
+        """, (color_id,))
+        tags = [row[0] for row in cursor.fetchall()]
+        colors.append({"id": color_id, "name": name, "tags": tags})
+    return colors
+
+def search_by_tag(tag: str) -> List[Dict]:
+    """Поиск цветов по тегу"""
+    cursor.execute("""
+        SELECT c.id, c.name FROM colors c
+        JOIN color_tags ct ON c.id = ct.color_id
+        JOIN tags t ON ct.tag_id = t.id
+        WHERE t.tags = ?
+    """, (tag.lower(),))
+    colors = []
+    for color_id, name in cursor.fetchall():
+        cursor.execute("""
+            SELECT t.tags FROM tags t
+            JOIN color_tags ct ON t.id = ct.tag_id
+            WHERE ct.color_id = ?
+        """, (color_id,))
+        tags = [row[0] for row in cursor.fetchall()]
+        colors.append({"id": color_id, "name": name, "tags": tags})
+    return colors

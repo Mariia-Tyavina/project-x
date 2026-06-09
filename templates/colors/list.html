@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Все цвета{% endblock %}
+{% block content %}
+<h2>🎨 Все цвета ({{ colors|length }})</h2>
+<div style="margin-bottom: 20px;">
+    <a href="{{ url_for('colors_add') }}" class="button">➕ Добавить цвет</a>
+    <a href="{{ url_for('colors_search') }}" class="button">🔍 Поиск по тегу</a>
+</div>
+<hr>
+{% if colors %}
+    {% for color in colors %}
+    <div class="card">
+        <div class="color-name" style="display: flex; align-items: center; gap: 10px;">
+            <span style="display: inline-block; width: 40px; height: 40px; background-color: {{ color.name }}; border: 1px solid #ccc; border-radius: 8px;"></span>
+            {{ color.name }}
+        </div>
+        <div>
+            🏷️ Теги:
+            {% for t in color.tags %}
+                <span class="tag">{{ t }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>База цветов пуста. Добавьте первый цвет.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Результаты поиска цветов{% endblock %}
+{% block content %}
+<h2>Цвета, содержащие тег «{{ tag }}»</h2>
+{% if results %}
+    <p>Найдено цветов: {{ results|length }}</p>
+    {% for color in results %}
+    <div class="card">
+        <div class="color-name" style="display: flex; align-items: center; gap: 10px;">
+            <span style="display: inline-block; width: 40px; height: 40px; background-color: {{ color.name }}; border: 1px solid #ccc; border-radius: 8px;"></span>
+            {{ color.name }}
+        </div>
+        <div>
+            🏷️ Теги:
+            {% for t in color.tags %}
+                <span class="tag">{{ t }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>Не найдено цветов с тегом «{{ tag }}».</p>
+{% endif %}
+<p><a href="{{ url_for('colors_search') }}">← Новый поиск</a> | <a href="{{ url_for('colors_list') }}">← Все цвета</a></p>
+{% endblock %}

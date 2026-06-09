@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Поиск по тегам{% endblock %}
+{% block content %}
+<h2>🏷️ Поиск фильмов по тегам</h2>
+<form method="POST">
+    <label>Теги (через пробел):</label> <input type="text" name="tags" placeholder="комедия боевик" required><br>
+    <label style="width: auto;">
+        <input type="checkbox" name="match_all"> Должны совпадать все теги
+    </label><br>
+    <button type="submit">🔍 Искать</button>
+</form>
+<p><a href="{{ url_for('movies_list') }}">← Назад</a></p>
+{% endblock %}

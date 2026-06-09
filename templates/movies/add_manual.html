@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Добавить фильм вручную{% endblock %}
+{% block content %}
+<h2>➕ Добавить фильм вручную</h2>
+<form method="POST">
+    <label>Название:</label> <input type="text" name="title" required><br>
+    <label>Год:</label> <input type="number" name="year" required><br>
+    <label>Режиссёр:</label> <input type="text" name="director" required><br>
+    <label>Описание:</label> <textarea name="description" rows="4" style="width: 300px;"></textarea><br>
+    <label>Рейтинг (0–10):</label> <input type="text" name="rating" step="0.1" required><br>
+    <label>Теги (через пробел):</label> <input type="text" name="tags" placeholder="комедия боевик драма"><br>
+    <button type="submit">💾 Сохранить фильм</button>
+</form>
+<p style="margin-top: 20px;"><a href="{{ url_for('movies_list') }}">← Назад к списку фильмов</a></p>
+{% endblock %}
