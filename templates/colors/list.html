@@ -12,7 +12,7 @@
     <div class="card">
         <div class="color-name" style="display: flex; align-items: center; gap: 10px;">
             <span style="display: inline-block; width: 40px; height: 40px; background-color: {{ color.name }}; border: 1px solid #ccc; border-radius: 8px;"></span>
-            {{ color.name }}
+            <strong>{{ color.name }}</strong>
         </div>
         <div>
             🏷️ Теги:
@@ -20,6 +20,14 @@
                 <span class="tag">{{ t }}</span>
             {% endfor %}
         </div>
+        {% if color.tags %}
+        <div style="margin-top: 12px;">
+            <a href="{{ url_for('movies_search_tags', tags=color.tags|join(' ')) }}" 
+               class="button" style="background: #4a5568; padding: 4px 12px; font-size: 0.8rem;">
+                🎬 Найти фильмы с этими тегами
+            </a>
+        </div>
+        {% endif %}
     </div>
     {% endfor %}
 {% else %}

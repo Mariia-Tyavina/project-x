@@ -51,33 +51,33 @@ class MovieManager:
                     PRIMARY KEY (movie_id, tag_id)
                 )
                             """)
+            cursor.execute("PRAGMA table_info(movies)")
+            columns = [col[1] for col in cursor.fetchall()]
+            if 'poster_path' not in columns:
+                cursor.execute("ALTER TABLE movies ADD COLUMN poster_path TEXT")
             conn.commit()
             
 
     def add_movie(self, title: str, year: int, director: str, 
-              description: str, rating: float, tags: List[str]):
+                description: str, rating: float, tags: List[str],
+                poster_path: str = None):
         with sqlite3.connect(self.db_file) as conn:
             cursor = conn.cursor()
-            
             cursor.execute("""
-                INSERT INTO movies (title, year, director, description, rating)
-                VALUES (?, ?, ?, ?, ?)
-            """, (title, year, director, description, rating))
-        
+                INSERT INTO movies (title, year, director, description, rating, poster_path)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (title, year, director, description, rating, poster_path))
             movie_id = cursor.lastrowid
-            
             for tag_name in tags:
-                cursor.execute("INSERT OR IGNORE INTO tags (name) VALUES (?)",
-                                (tag_name,))
-                cursor.execute("SELECT id FROM tags WHERE name = ?",
-                                (tag_name,))
+                cursor.execute("INSERT OR IGNORE INTO tags (name) VALUES (?)", 
+                               (tag_name,))
+                cursor.execute("SELECT id FROM tags WHERE name = ?", 
+                               (tag_name,))
                 tag_id = cursor.fetchone()[0]
-            
                 cursor.execute("""
                     INSERT INTO movie_tags (movie_id, tag_id)
                     VALUES (?, ?)
                 """, (movie_id, tag_id))
-        
             conn.commit()
             print(f"Фильм '{title}' добавлен")
     
@@ -186,6 +186,7 @@ class MovieManager:
             year = 0
             if full_info.get('release_date'):
                 year = int(full_info['release_date'][:4])
+            poster_path = full_info.get('poster_path')
             if self.movie_exists(full_info['title'], year):
                 return False, "Фильм уже есть в базе"   # ← замена print
             self.add_movie(
@@ -194,7 +195,8 @@ class MovieManager:
                 director=director,
                 description=full_info.get('overview', 'Нет описания')[:500],
                 rating=full_info.get('vote_average', 0),
-                tags=tags
+                tags=tags,
+                poster_path=poster_path
             )
             return True, f"Фильм '{full_info['title']}' добавлен"   # ← замена print
         except Exception as e:
