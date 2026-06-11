@@ -225,34 +225,46 @@ class MovieManager:
         faiss.write_index(index_with_ids, index_filename)
         
     def search_by_index(self, query: str, amount = 5):
+        exact_matches = []
+        lower_query = query.lower()
+        all_movies = self.get_all_movies()  # получаем все фильмы с тегами
+
+        for movie in all_movies:
+            title_lower = movie['title'].lower()
+            desc_lower = movie['description'].lower()
+            if lower_query in title_lower or lower_query in desc_lower:
+                movie_copy = movie.copy()
+                movie_copy['similarity_score'] = 1.0
+                exact_matches.append(movie_copy)
+                if len(exact_matches) >= amount:
+                    break
+
         index_filename = "movie_search.index"
-    
-        if not os.path.exists(index_filename):
-            print("Поисковый индекс не найден!")
-            return []
+        semantic_results = []
+        if os.path.exists(index_filename):
+            index_with_ids = faiss.read_index(index_filename)
+            query_embedding = model.encode([query])
+            faiss.normalize_L2(query_embedding)
+            distances, indices = index_with_ids.search(query_embedding, amount)
+            if indices is not None and len(indices) > 0 and len(indices[0]) > 0:
+                found_ids = indices[0].tolist()
+                found_distances = distances[0].tolist()
+                movies_by_id = {movie['id']: movie for movie in all_movies}
+                for movie_id, distance in zip(found_ids, found_distances):
+                    if movie_id in movies_by_id:
+                        movie = movies_by_id[movie_id].copy()
+                        movie['similarity_score'] = round(distance, 3)
+                        semantic_results.append(movie)
         
-        index_with_ids = faiss.read_index(index_filename)
-        query_embedding = model.encode([query])
-        faiss.normalize_L2(query_embedding)
-        distances, indices = index_with_ids.search(query_embedding, amount)
-        
-        if indices is None or len(indices) == 0 or len(indices[0]) == 0:
-            print("Ничего не найдено")
-            return []
-        
-        found_ids = indices[0].tolist()
-        found_distances = distances[0].tolist()
-        all_movies = self.get_all_movies()
-        movies_by_id = {movie['id']: movie for movie in all_movies}
-        results = []
-        for movie_id, distance in zip(found_ids, found_distances):
-            if movie_id in movies_by_id:
-                movie = movies_by_id[movie_id].copy()
-                movie['similarity_score'] = round(distance, 3)  # добавляем оценку похожести
-                results.append(movie)
-        
-        return results
-    
+        combined = exact_matches.copy()
+        existing_ids = {m['id'] for m in exact_matches}
+        for movie in semantic_results:
+            if movie['id'] not in existing_ids:
+                combined.append(movie)
+
+        return combined[:amount]
+
+
     def show_index_results(self, results: list, query: str):        
         if not results:
             print(f"\nПо запросу '{query}' ничего не найдено")
