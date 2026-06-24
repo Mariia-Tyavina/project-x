@@ -2,9 +2,47 @@
 {% block title %}Поиск цветов по тегу{% endblock %}
 {% block content %}
 <h2>🔍 Поиск цветов по тегу</h2>
-<form method="POST">
-    <label>Тег:</label> <input type="text" name="tag" placeholder="например: теплый" required><br>
-    <button type="submit">Найти</button>
+
+<form method="POST" style="margin-bottom: 20px;">
+    <label for="tag" style="display: block; margin-bottom: 10px; font-weight: bold;">Тег:</label>
+    <input type="text" 
+           name="tag" 
+           id="tag" 
+           placeholder="например: теплый, яркий, холодный"
+           required
+           style="width: 100%; 
+                  max-width: 400px;
+                  padding: 12px 18px;
+                  font-size: 1rem;
+                  background: rgba(255,255,255,0.1);
+                  border: 1px solid rgba(255,255,255,0.3);
+                  border-radius: 40px;
+                  color: white;
+                  outline: none;
+                  transition: all 0.3s ease;">
+    <br><br>
+    <button type="submit" class="button">🔍 Найти</button>
 </form>
-<p><a href="{{ url_for('colors_list') }}">← Назад</a></p>
+
+<div style="margin-top: 30px;">
+    <a href="{{ url_for('colors_list') }}" class="button" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
+        ← Назад
+    </a>
+</div>
+
+<style>
+    /* Подсветка поля при фокусе */
+    input[name="tag"]:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 12px rgba(74,144,226,0.5);
+        background: rgba(0,0,0,0.6);
+    }
+    /* Адаптивность для мобильных */
+    @media (max-width: 600px) {
+        input[name="tag"] {
+            font-size: 0.9rem;
+            padding: 10px 14px;
+        }
+    }
+</style>
 {% endblock %}

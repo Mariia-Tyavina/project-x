@@ -2,10 +2,47 @@
 {% block title %}Добавить из TMDB{% endblock %}
 {% block content %}
 <h2>🌐 Добавить фильм автоматически (TMDB)</h2>
-<form method="POST">
-    <label>Название фильма:</label> <input type="text" name="query" placeholder="Например: Матрица" required><br>
-    <button type="submit">🔍 Найти и добавить</button>
+
+<form method="POST" style="margin-bottom: 20px;">
+    <label for="query" style="display: block; margin-bottom: 10px; font-weight: bold;">Название фильма:</label>
+    <input type="text" 
+           name="query" 
+           id="query" 
+           placeholder="Например: Матрица, Интерстеллар, Бэтмен"
+           required
+           style="width: 100%; 
+                  max-width: 500px;
+                  padding: 12px 18px;
+                  font-size: 1rem;
+                  background: rgba(255,255,255,0.1);
+                  border: 1px solid rgba(255,255,255,0.3);
+                  border-radius: 40px;
+                  color: white;
+                  outline: none;
+                  transition: all 0.3s ease;">
+    <br><br>
+    <button type="submit" class="button">🔍 Найти и добавить</button>
 </form>
-<p><small>Будет добавлен первый результат поиска (жанры станут тегами). Если фильм уже есть в базе — дубль не создастся.</small></p>
-<p><a href="{{ url_for('movies_list') }}">← Назад к списку фильмов</a></p>
+
+
+<div style="margin-top: 30px;">
+    <a href="{{ url_for('movies_list') }}" class="button" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(5px);">
+        ← Назад
+    </a>
+</div>
+
+<style>
+    input[name="query"]:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 12px rgba(74,144,226,0.5);
+        background: rgba(0,0,0,0.6);
+    }
+    /* Адаптивность */
+    @media (max-width: 600px) {
+        input[name="query"] {
+            font-size: 0.9rem;
+            padding: 10px 14px;
+        }
+    }
+</style>
 {% endblock %}

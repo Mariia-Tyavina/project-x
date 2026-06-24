@@ -1,5 +1,5 @@
 import sqlite3
-from typing import List
+from typing import List,Dict
 
 
 connect = sqlite3.connect('table_of_colors.db', check_same_thread=False)

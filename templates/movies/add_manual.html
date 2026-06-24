@@ -2,14 +2,59 @@
 {% block title %}Добавить фильм вручную{% endblock %}
 {% block content %}
 <h2>➕ Добавить фильм вручную</h2>
-<form method="POST">
-    <label>Название:</label> <input type="text" name="title" required><br>
-    <label>Год:</label> <input type="number" name="year" required><br>
-    <label>Режиссёр:</label> <input type="text" name="director" required><br>
-    <label>Описание:</label> <textarea name="description" rows="4" style="width: 300px;"></textarea><br>
-    <label>Рейтинг (0–10):</label> <input type="text" name="rating" step="0.1" required><br>
-    <label>Теги (через пробел):</label> <input type="text" name="tags" placeholder="комедия боевик драма"><br>
-    <button type="submit">💾 Сохранить фильм</button>
+
+<form method="POST" style="display: flex; flex-direction: column; gap: 15px; max-width: 600px;">
+    <div>
+        <label for="title" style="display: block; margin-bottom: 6px; font-weight: bold;">Название:</label>
+        <input type="text" name="title" id="title" required
+               style="width: 100%; padding: 10px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; color: white; font-size: 1rem; outline: none; transition: all 0.3s;">
+    </div>
+    <div>
+        <label for="year" style="display: block; margin-bottom: 6px; font-weight: bold;">Год:</label>
+        <input type="number" name="year" id="year" required
+               style="width: 100%; padding: 10px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; color: white; font-size: 1rem; outline: none;">
+    </div>
+    <div>
+        <label for="director" style="display: block; margin-bottom: 6px; font-weight: bold;">Режиссёр:</label>
+        <input type="text" name="director" id="director" required
+               style="width: 100%; padding: 10px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; color: white; font-size: 1rem; outline: none;">
+    </div>
+    <div>
+        <label for="description" style="display: block; margin-bottom: 6px; font-weight: bold;">Описание:</label>
+        <textarea name="description" id="description" rows="4"
+                  style="width: 100%; padding: 10px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; color: white; font-size: 1rem; outline: none; resize: vertical;"></textarea>
+    </div>
+    <div>
+        <label for="rating" style="display: block; margin-bottom: 6px; font-weight: bold;">Рейтинг (0–10):</label>
+        <input type="text" name="rating" id="rating" step="0.1" required
+               style="width: 100%; padding: 10px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; color: white; font-size: 1rem; outline: none;">
+    </div>
+    <div>
+        <label for="tags" style="display: block; margin-bottom: 6px; font-weight: bold;">Теги (через пробел):</label>
+        <input type="text" name="tags" id="tags" placeholder="комедия боевик драма"
+               style="width: 100%; padding: 10px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; color: white; font-size: 1rem; outline: none;">
+    </div>
+    <div style="display: flex; gap: 15px; margin-top: 10px;">
+        <button type="submit" class="button">💾 Сохранить фильм</button>
+        <a href="{{ url_for('movies_list') }}" class="button" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(5px);">← Назад</a>
+    </div>
 </form>
-<p style="margin-top: 20px;"><a href="{{ url_for('movies_list') }}">← Назад к списку фильмов</a></p>
+
+<style>
+    input:focus, textarea:focus {
+        border-color: #4a90e2 !important;
+        box-shadow: 0 0 10px rgba(74,144,226,0.5);
+        background: rgba(0,0,0,0.6) !important;
+    }
+    /* Адаптивность */
+    @media (max-width: 600px) {
+        input, textarea {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+        }
+        .button {
+            padding: 6px 14px;
+        }
+    }
+</style>
 {% endblock %}
