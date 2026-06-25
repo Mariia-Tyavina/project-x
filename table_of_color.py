@@ -1,11 +1,16 @@
+# table_of_color.py — модуль для управления цветами и их тегами.
+# Использует глобальное соединение с БД 
+
+
 import sqlite3
-from typing import List
+from typing import List, Dict
 
-
+# Глобальное соединение с БД 
 connect = sqlite3.connect('table_of_colors.db', check_same_thread=False)
 cursor = connect.cursor()
 
 
+# Создание таблиц, если их нет
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS colors (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,11 +33,19 @@ cursor.execute("""
         FOREIGN KEY (tag_id) REFERENCES tags (id),
         PRIMARY KEY (color_id, tag_id)
     )
-                """)
+""")
 connect.commit()
 
 
 def submit(color: str, tags: List[str]):
+    """
+    Добавляет цвет в таблицу colors (если его ещё нет) и связывает с тегами.
+
+    Аргументы:
+        color (str): Название цвета.
+        tags (List[str]): Список тегов для этого цвета.
+    """
+    # Проверяем, существует ли уже такой цвет
     cursor.execute("SELECT id FROM colors WHERE name = ?", (color,))
     existing_color = cursor.fetchone()
     
@@ -45,11 +58,17 @@ def submit(color: str, tags: List[str]):
         """, (color,))
         color_id = cursor.lastrowid
     
+    # Добавляем теги (если их нет — создаём)
     for tag_name in tags:
-        cursor.execute("INSERT OR IGNORE INTO tags (tags) VALUES (?)", (tag_name,))
-        cursor.execute("SELECT id FROM tags WHERE tags = ?", (tag_name,))
+        cursor.execute(
+            "INSERT OR IGNORE INTO tags (tags) VALUES (?)", (tag_name,)
+        )
+        cursor.execute(
+            "SELECT id FROM tags WHERE tags = ?", (tag_name,)
+        )
         tag_id = cursor.fetchone()[0]
         
+        # Проверяем, не существует ли уже связь цвет-тег
         cursor.execute("""
             SELECT 1 FROM color_tags 
             WHERE color_id = ? AND tag_id = ?
@@ -64,7 +83,12 @@ def submit(color: str, tags: List[str]):
     connect.commit()
 
 def get_all_colors() -> List[Dict]:
-    """Возвращает все цвета с их тегами"""
+    """
+    Возвращает список всех цветов с их тегами.
+
+    Returns:
+        List[Dict]: Список словарей с ключами 'id', 'name', 'tags'.
+    """
     cursor.execute("SELECT id, name FROM colors ORDER BY name")
     colors = []
     for color_id, name in cursor.fetchall():
@@ -78,7 +102,15 @@ def get_all_colors() -> List[Dict]:
     return colors
 
 def search_by_tag(tag: str) -> List[Dict]:
-    """Поиск цветов по тегу"""
+    """
+    Ищет цвета по точному совпадению тега.
+
+    Аргументы:
+        tag (str): Искомый тег.
+
+    Returns:
+        List[Dict]: Список цветов с их тегами.
+    """
     cursor.execute("""
         SELECT c.id, c.name FROM colors c
         JOIN color_tags ct ON c.id = ct.color_id

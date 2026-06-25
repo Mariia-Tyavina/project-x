@@ -1,12 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Все фильмы{% endblock %}
 {% block content %}
-<h2>🎬 Все фильмы ({{ movies|length }})</h2>
+<h2>🎬 Все фильмы </h2>
 <div style="margin-bottom: 20px;">
     <a href="{{ url_for('movies_add_manual') }}" class="button">➕ Добавить вручную</a>
     <a href="{{ url_for('movies_add_tmdb') }}" class="button" style="background: #38a169;">🌐 Добавить из TMDB</a>
     <a href="{{ url_for('movies_search_tags') }}" class="button">🏷️ Поиск по тегам</a>
-    <a href="{{ url_for('movies_search_desc') }}" class="button">🔍 Поиск по описанию</a>
 </div>
 <hr>
 {% if movies %}
@@ -16,10 +15,17 @@
         <img src="{{ get_poster_url(movie.poster_path) }}" alt="{{ movie.title }}" 
              style="width: 100px; border-radius: 8px; object-fit: cover;">
         {% else %}
-        <div style="width: 100px; height: 150px; background: #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #666;">нет постера</div>
+        <div style="width: 100px; 
+        height: 150px; background: #ddd; 
+        border-radius: 8px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-size: 12px; color: #666;">нет постера</div>
         {% endif %}
         <div style="flex:1">
-            <div class="movie-title">{{ movie.title }} <span style="font-size: 0.9rem; color: #718096;">({{ movie.year }})</span></div>
+            <div class="movie-title">{{ movie.title }} <span style="font-size: 0.9rem; 
+            color: #718096;">({{ movie.year }})</span></div>
             <div>🎬 Режиссёр: {{ movie.director }}</div>
             <div>⭐ Рейтинг: <span class="rating">{{ movie.rating }}</span>/10</div>
             <div>
@@ -35,4 +41,15 @@
 {% else %}
     <p>База фильмов пуста. Добавьте первый фильм через кнопки выше.</p>
 {% endif %}
+
+<div class="pagination" style="text-align: center; margin-top: 30px;">
+    {% if page > 1 %}
+        <a href="?page={{ page-1 }}" class="button">← Предыдущая</a>
+    {% endif %}
+    Страница {{ page }} из {{ total_pages }}
+    {% if page < total_pages %}
+        <a href="?page={{ page+1 }}" class="button">Следующая →</a>
+    {% endif %}
+</div>
+
 {% endblock %}

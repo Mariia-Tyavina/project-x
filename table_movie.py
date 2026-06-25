@@ -1,3 +1,7 @@
+# table_movie.py — модуль для управления фильмами в базе данных.
+# Содержит класс MovieManager, который отвечает за CRUD-операции,
+# поиск по тегам, импорт из TMDB, создание FAISS-индекса и семантический поиск
+
 import sqlite3
 from typing import List, Dict
 import requests
@@ -7,23 +11,36 @@ import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
 
-
+# Загружаем переменные окружения из .env (ключ TMDB_API)
 load_dotenv()
+
+# Глобальная модель SentenceTransformer для получения эмбеддингов текстов
 model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 
 
 class MovieManager:
-    
+    """
+    Класс для управления фильмами: добавление, поиск, индексирование.
+    """
 
     def __init__(self, db_file: str = "movies.db"):
+        """
+        Инициализация менеджера с указанием файла базы данных.
+        Если база не существует, она будет создана с необходимыми таблицами.
+        """
         self.db_file = db_file
         self.init_database()
     
 
     def init_database(self):
+        """
+        Создаёт таблицы movies, tags, movie_tags, если они отсутствуют.
+        Также добавляет колонку poster_path, если её ещё нет.
+        """
         with sqlite3.connect(self.db_file) as conn:
             cursor = conn.cursor()
             
+            # Таблица фильмов
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS movies(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,15 +50,17 @@ class MovieManager:
                     description TEXT,
                     rating REAL                    
                 )
-                            """)
+            """)
             
+            # Таблица тегов (уникальные имена)
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS tags(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT UNIQUE NOT NULL
                 )
-                           """)
+            """)
             
+            # Связующая таблица фильм-тег
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS movie_tags (
                     movie_id INTEGER,
@@ -50,40 +69,78 @@ class MovieManager:
                     FOREIGN KEY (tag_id) REFERENCES tags (id),
                     PRIMARY KEY (movie_id, tag_id)
                 )
-                            """)
+            """)
+            
+            # Добавляем колонку poster_path (если её нет)
             cursor.execute("PRAGMA table_info(movies)")
             columns = [col[1] for col in cursor.fetchall()]
             if 'poster_path' not in columns:
-                cursor.execute("ALTER TABLE movies ADD COLUMN poster_path TEXT")
+                cursor.execute(
+                    "ALTER TABLE movies ADD COLUMN poster_path TEXT"
+                )
+
             conn.commit()
             
 
     def add_movie(self, title: str, year: int, director: str, 
                 description: str, rating: float, tags: List[str],
                 poster_path: str = None):
+        """
+        Добавляет новый фильм в базу данных и связывает его с тегами.
+
+        Аргументы:
+            title (str): Название фильма.
+            year (int): Год выпуска.
+            director (str): Режиссёр.
+            description (str): Описание.
+            rating (float): Рейтинг (0–10).
+            tags (List[str]): Список тегов.
+            poster_path (str, optional): Относительный путь к постеру.
+        """
         with sqlite3.connect(self.db_file) as conn:
             cursor = conn.cursor()
+            # Вставляем фильм
             cursor.execute("""
-                INSERT INTO movies (title, year, director, description, rating, poster_path)
+                INSERT INTO movies 
+                (title, year, director, description, rating, poster_path)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (title, year, director, description, rating, poster_path))
+
             movie_id = cursor.lastrowid
+            
+            # Для каждого тега — либо находим существующий, либо создаём новый
             for tag_name in tags:
-                cursor.execute("INSERT OR IGNORE INTO tags (name) VALUES (?)", 
-                               (tag_name,))
-                cursor.execute("SELECT id FROM tags WHERE name = ?", 
-                               (tag_name,))
+                cursor.execute(
+                    "INSERT OR IGNORE INTO tags (name) VALUES (?)", 
+                    (tag_name,)
+                )
+                cursor.execute(
+                    "SELECT id FROM tags WHERE name = ?", 
+                    (tag_name,)
+                )
                 tag_id = cursor.fetchone()[0]
                 cursor.execute("""
                     INSERT INTO movie_tags (movie_id, tag_id)
                     VALUES (?, ?)
                 """, (movie_id, tag_id))
+
             conn.commit()
             print(f"Фильм '{title}' добавлен")
     
 
     def search_by_tags(self, tags: List[str], 
                        match_all: bool = False) -> List[Dict]:
+        """
+        Ищет фильмы по списку тегов.
+
+        Аргументы:
+            tags (List[str]): Список тегов для поиска.
+            match_all (bool): Если True, фильм должен содержать все теги;
+                              если False — достаточно любого из них.
+
+        Возвращает:
+            List[Dict]: Список фильмов, каждый содержит поля и теги.
+        """
         with sqlite3.connect(self.db_file) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
@@ -94,6 +151,7 @@ class MovieManager:
             tagline = ','.join(['?' for _ in tags])
             
             if match_all:
+                # Поиск фильмов, у которых есть ВСЕ указанные теги
                 cursor.execute(f"""
                     SELECT m.*
                     FROM movies m
@@ -104,6 +162,7 @@ class MovieManager:
                     HAVING COUNT(DISTINCT t.id) = ?
                 """, tags + [len(tags)])
             else:
+                # Поиск фильмов, у которых есть ХОТЯ БЫ ОДИН из тегов
                 cursor.execute(f"""
                     SELECT DISTINCT m.*
                     FROM movies m
@@ -114,7 +173,8 @@ class MovieManager:
                 """, tags)
             
             movies = [dict(row) for row in cursor.fetchall()]
-        
+
+            # Дозагружаем теги для каждого найденного фильма
             for movie in movies:
                 cursor.execute("""
                     SELECT t.name
@@ -128,6 +188,10 @@ class MovieManager:
        
 
     def get_all_movies(self) -> List[Dict]:
+        """
+        Возвращает все фильмы из базы, отсортированные по рейтингу (убывание).
+        Каждый фильм содержит поле 'tags' со списком тегов.
+        """
         with sqlite3.connect(self.db_file) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
@@ -138,7 +202,7 @@ class MovieManager:
             """)
             
             movies = [dict(row) for row in cursor.fetchall()]
-
+            # Подгружаем теги
             for movie in movies:
                 cursor.execute("""
                     SELECT t.name
@@ -152,6 +216,9 @@ class MovieManager:
     
 
     def movie_exists(self, title: str, year: int) -> bool:
+        """
+        Проверяет, существует ли уже фильм с таким названием и годом.
+        """
         with sqlite3.connect(self.db_file) as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -163,32 +230,65 @@ class MovieManager:
            
 
     def search_by_tmdb(self, searching: str):
+        """
+        Ищет фильм на TMDB по названию и добавляет первый результат в базу.
+
+        Аргументы:
+            searching (str): Название фильма для поиска.
+
+        Возвращает:
+            tuple (bool, str): (успех, сообщение).
+        """
         API_KEY = os.getenv('TMDB_API')
         try:
+            # 1) Поиск фильмов по названию
             search_url = "https://api.themoviedb.org/3/search/movie"
-            params = {"api_key": API_KEY, "query": searching, "language": "ru-RU"}
+            params = {
+                "api_key": API_KEY, 
+                "query": searching, 
+                "language": "ru-RU"
+                }
             response = requests.get(search_url, params=params)
             results = response.json().get('results', [])
+
             if not results:
-                return False, "Ничего не найдено"      # ← замена print
+                return False, "Ничего не найдено" 
+              
+            # Берём первый результат
             movie = results[0]
             movie_id = movie['id']
+
+            # 2) Получение расширенной информации (режиссёр, жанры, постер)
             details_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
-            params = {"api_key": API_KEY, "language": "ru-RU", "append_to_response": "credits"}
+            params = {"api_key": API_KEY, 
+                      "language": "ru-RU", 
+                      "append_to_response": "credits"
+            }
             response = requests.get(details_url, params=params)
             full_info = response.json()
+
+            # Извлекаем режиссёра
             director = "Не указан"
             for crew in full_info.get('credits', {}).get('crew', []):
                 if crew.get('job') == 'Director':
                     director = crew.get('name')
                     break
-            tags = [genre['name'].lower() for genre in full_info.get('genres', [])]
+            
+            # Жанры → теги
+            tags = [genre['name'].lower() 
+                    for genre in full_info.get('genres', [])]
+            
             year = 0
             if full_info.get('release_date'):
                 year = int(full_info['release_date'][:4])
+
             poster_path = full_info.get('poster_path')
+
+            # Проверка дубликата
             if self.movie_exists(full_info['title'], year):
-                return False, "Фильм уже есть в базе"   # ← замена print
+                return False, "Фильм уже есть в базе"  
+            
+            # Добавляем фильм в базу
             self.add_movie(
                 title=full_info['title'],
                 year=year,
@@ -198,33 +298,62 @@ class MovieManager:
                 tags=tags,
                 poster_path=poster_path
             )
-            return True, f"Фильм '{full_info['title']}' добавлен"   # ← замена print
+            return True, f"Фильм '{full_info['title']}' добавлен"
+        
         except Exception as e:
             return False, f"Ошибка: {str(e)}"
         
     def create_search_index(self):
+        """
+        Создаёт FAISS-индекс для семантического поиска по описаниям фильмов.
+        Индекс сохраняется в файл 'movie_search.index'.
+        Использует модель SentenceTransformer для генерации эмбеддингов.
+        """
         all_movies = self.get_all_movies()
         if not all_movies:
             print("В базе нет фильмов! Сначала добавьте фильмы.")
             return
+        
         descriptions = []
         movie_ids = []
         for movie in all_movies:
+            # Для индекса берём описание, если оно есть, иначе — название
             description = movie.get("description", '')
             if not description or description == "Нет описания":
                 description = movie.get('title', '')
             descriptions.append(description)
             movie_ids.append(movie['id'])
-        description_embeddings = model.encode(descriptions, show_progress_bar=True)
+
+        # Генерируем эмбеддинги
+        description_embeddings = model.encode(
+            descriptions,
+            show_progress_bar=True
+        )
         vector_dimension = description_embeddings.shape[1]
+
+        #Создаём индекс FAISS внутреннее произведение, нормализованные векторы
         index = faiss.IndexFlatIP(vector_dimension)
         index_with_ids = faiss.IndexIDMap(index)
         faiss.normalize_L2(description_embeddings)
-        index_with_ids.add_with_ids(description_embeddings, np.array(movie_ids))
+        index_with_ids.add_with_ids(description_embeddings, 
+                                    np.array(movie_ids))
         index_filename = "movie_search.index"
         faiss.write_index(index_with_ids, index_filename)
         
     def search_by_index(self, query: str, amount = 5):
+        """
+        Выполняет гибридный поиск: сначала точное совпадение подстроки
+        в названии или описании (регистронезависимо), затем семантический
+        поиск через FAISS. Результаты объединяются без дубликатов.
+
+        Аргументы:
+            query (str): Поисковый запрос.
+            amount (int): Максимальное количество возвращаемых фильмов.
+
+        Возвращает:
+            List[Dict]: Список фильмов с полем similarity_score.
+        """
+        # Точное совпадение по подстроке (регистронезависимо)
         exact_matches = []
         lower_query = query.lower()
         all_movies = self.get_all_movies()  # получаем все фильмы с тегами
@@ -239,14 +368,19 @@ class MovieManager:
                 if len(exact_matches) >= amount:
                     break
 
+        # cемантический поиск через FAISS
         index_filename = "movie_search.index"
         semantic_results = []
         if os.path.exists(index_filename):
             index_with_ids = faiss.read_index(index_filename)
             query_embedding = model.encode([query])
             faiss.normalize_L2(query_embedding)
-            distances, indices = index_with_ids.search(query_embedding, amount)
-            if indices is not None and len(indices) > 0 and len(indices[0]) > 0:
+            distances, indices = index_with_ids.search(
+                query_embedding,
+                amount
+                )
+            if indices is not None and len(indices) > 0 \
+            and len(indices[0]) > 0:
                 found_ids = indices[0].tolist()
                 found_distances = distances[0].tolist()
                 movies_by_id = {movie['id']: movie for movie in all_movies}
@@ -256,6 +390,7 @@ class MovieManager:
                         movie['similarity_score'] = round(distance, 3)
                         semantic_results.append(movie)
         
+        # Объединяем, убирая дубликаты по id
         combined = exact_matches.copy()
         existing_ids = {m['id'] for m in exact_matches}
         for movie in semantic_results:
@@ -265,7 +400,10 @@ class MovieManager:
         return combined[:amount]
 
 
-    def show_index_results(self, results: list, query: str):        
+    def show_index_results(self, results: list, query: str):
+        """
+        Выводит в консоль результаты семантического поиска (для отладки).
+        """        
         if not results:
             print(f"\nПо запросу '{query}' ничего не найдено")
             return

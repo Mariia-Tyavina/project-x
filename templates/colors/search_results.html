@@ -2,15 +2,26 @@
 {% block title %}Результаты поиска цветов{% endblock %}
 {% block content %}
 <h2>Цвета, содержащие тег «{{ tag }}»</h2>
+
 {% if results %}
-    <p>Найдено цветов: {{ results|length }}</p>
+    <p>Найдено цветов: {{ total }}. Показано {{ results|length }} на странице {{ page }} из {{ total_pages }}.</p>
+    {% set color_map = {
+        'красный': '#FF0000', 'зеленый': '#00FF00', 'синий': '#0000FF',
+        'желтый': '#FFFF00', 'черный': '#000000', 'белый': '#FFFFFF',
+        'серый': '#808080', 'оранжевый': '#FFA500', 'фиолетовый': '#800080',
+        'розовый': '#FFC0CB', 'коричневый': '#A52A2A', 'голубой': '#00FFFF',
+        'салатовый': '#7FFF00', 'лайм': '#00FF00', 'бордовый': '#800000',
+        'бирюзовый': '#40E0D0', 'золотой': '#FFD700'
+    } %}
     {% for color in results %}
     <div class="card">
-        <div class="color-name" style="display: flex; align-items: center; gap: 10px;">
-            <span style="display: inline-block; width: 40px; height: 40px; background-color: {{ color.name }}; border: 1px solid #ccc; border-radius: 8px;"></span>
-            {{ color.name }}
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 40px; height: 40px; 
+            background-color: {{ color_map.get(color.name, '#555555') }}; 
+            border-radius: 8px; border: 1px solid rgba(255,255,255,0.3);"></div>
+            <strong>{{ color.name }}</strong>
         </div>
-        <div>
+        <div style="margin-top: 8px;">
             🏷️ Теги:
             {% for t in color.tags %}
                 <span class="tag">{{ t }}</span>
@@ -18,8 +29,39 @@
         </div>
     </div>
     {% endfor %}
+
+    
+    <div style="margin-top: 30px; text-align: center; 
+    display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+        {% if page > 1 %}
+            <a href="?page={{ page-1 }}" class="button">← Предыдущая</a>
+        {% endif %}
+        <span style="background: rgba(255,255,255,0.1); 
+        padding: 6px 16px; border-radius: 30px;">{{ page }} / {{ total_pages }}</span>
+        {% if page < total_pages %}
+            <a href="?page={{ page+1 }}" class="button">Следующая →</a>
+        {% endif %}
+    </div>
 {% else %}
     <p>Не найдено цветов с тегом «{{ tag }}».</p>
 {% endif %}
-<p><a href="{{ url_for('colors_search') }}">← Новый поиск</a> | <a href="{{ url_for('colors_list') }}">← Все цвета</a></p>
+
+<div style="margin-top: 30px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+    <a href="{{ url_for('colors_search') }}" class="button">🔍 Новый поиск</a>
+    <a href="{{ url_for('colors_list') }}" class="button" style="background: rgba(255,255,255,0.2); 
+    backdrop-filter: blur(5px);">← Все цвета</a>
+</div>
+
+<style>
+    .tag {
+        display: inline-block;
+        background: rgba(74, 144, 226, 0.7);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        margin-right: 6px;
+        margin-bottom: 6px;
+        color: white;
+    }
+</style>
 {% endblock %}

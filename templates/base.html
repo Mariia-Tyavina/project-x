@@ -12,164 +12,273 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
-            padding: 20px;
+            background: radial-gradient(ellipse at bottom, #0d1d31 0%, #0c0d13 100%);
+            min-height: 100vh;
+            color: #eee;
+            position: relative;
+            overflow-x: hidden;
         }
+    
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle 2s infinite alternate;
+            opacity: 0.5;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.2; transform: scale(1);}
+            100% { opacity: 1; transform: scale(1.2);}
+        }
+       
         .container {
-            max-width: 1200px;
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
             margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            background: rgba(15, 25, 45, 0.75);
+            backdrop-filter: blur(3px);
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             overflow: hidden;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 30px;
+            background: rgba(0,0,0,0.6);
+            padding: 25px 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
         }
         header h1 {
-            margin-bottom: 10px;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #4a90e2;
         }
         nav {
-            background: #f8f9fa;
+            background: rgba(0,0,0,0.5);
             padding: 12px 30px;
-            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
         }
         nav a {
+            color: #ddd;
             text-decoration: none;
-            color: #495057;
-            margin-right: 20px;
-            font-weight: 500;
-            transition: color 0.2s;
+            font-weight: bold;
+            transition: 0.3s;
+            padding: 5px 10px;
+            border-radius: 20px;
         }
         nav a:hover {
-            color: #667eea;
+            color: white;
+            background: rgba(255,255,255,0.2);
+            text-shadow: 0 0 5px white;
         }
         main {
             padding: 30px;
+            min-height: 60vh;
         }
         .flash {
             padding: 12px 20px;
             margin-bottom: 20px;
-            border-radius: 8px;
-            font-weight: 500;
-        }
-        .flash.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .flash.danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .flash.warning {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-        }
-        .card {
-            background: #ffffff;
             border-radius: 12px;
+            font-weight: bold;
+        }
+        .flash.success { background: #2e7d64; color: white; }
+        .flash.danger { background: #a13e3e; color: white; }
+        .flash.warning { background: #b9661a; color: white; }
+        .card {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: transform 0.1s ease;
+            margin-bottom: 25px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(255,255,255,0.2);
         }
         .card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+            border-color: rgba(255,255,255,0.5);
+        }
+        .movie-poster {
+            width: 120px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px black;
+            transition: 0.2s;
+        }
+        .movie-poster:hover {
+            transform: scale(1.02);
         }
         .tag {
             display: inline-block;
-            background: #e9ecef;
-            padding: 4px 10px;
+            background: rgba(74, 144, 226, 0.7);
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             margin-right: 6px;
             margin-bottom: 6px;
-            color: #495057;
+            color: white;
         }
         button, .button {
-            background-color: #667eea;
-            color: white;
+            background: linear-gradient(135deg, #4a90e2, #6a4e9b);
             border: none;
-            padding: 8px 18px;
-            border-radius: 24px;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: background 0.2s;
+            transition: 0.2s;
             text-decoration: none;
             display: inline-block;
         }
         button:hover, .button:hover {
-            background-color: #5a67d8;
+            transform: scale(1.02);
+            box-shadow: 0 0 10px #4a90e2;
         }
-        form label {
-            display: inline-block;
-            width: 120px;
-            font-weight: 600;
-            margin-top: 12px;
+        .random-posters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
         }
-        form input, form textarea, form select {
-            padding: 8px 12px;
-            width: 300px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 0.9rem;
+        .poster-card {
+            background: rgba(0,0,0,0.5);
+            border-radius: 16px;
+            padding: 10px;
+            text-align: center;
+            width: 150px;
+            transition: 0.2s;
         }
-        hr {
-            margin: 20px 0;
-            border: none;
-            border-top: 1px solid #e0e0e0;
-        }
-        .movie-title, .color-name {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #2d3748;
-        }
-        .rating {
-            background: #fbbf24;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            display: inline-block;
-        }
-        a {
-            color: #667eea;
+        .poster-card img {
+            width: 130px;
+            border-radius: 10px;
         }
         footer {
             text-align: center;
             padding: 15px;
-            color: #6c757d;
+            background: rgba(0,0,0,0.5);
             font-size: 0.8rem;
-            border-top: 1px solid #e0e0e0;
+            border-top: 1px solid rgba(255,255,255,0.2);
         }
+        hr {
+            border-color: rgba(255,255,255,0.2);
+        }
+        @media (max-width: 768px) {
+            .container { margin: 10px; }
+            main { padding: 15px; }
+            .movie-poster { width: 80px; height: 120px; }
+        }
+            input[name="query"]:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 10px rgba(74,144,226,0.6);
+        background: rgba(0,0,0,0.8);
+    }
+
+    @media (max-width: 800px) {
+        nav > div:last-child {
+            display: none;
+        }
+        nav {
+            justify-content: center;
+        }
+        form {
+            flex: 0 1 auto;
+        }
+    }
     </style>
 </head>
 <body>
+<div class="stars" id="stars"></div>
+<script>
+    function createStars() {
+        const starsContainer = document.getElementById('stars');
+        const starCount = 150;  
+        
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            const size = Math.random() * 3 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            
+            
+            let x;
+            const r = Math.random();
+            if (r < 0.4) { 
+                x = Math.random() * 0.2;
+            } else if (r < 0.7) { 
+                x = 0.8 + Math.random() * 0.2;
+            } else { 
+                x = 0.2 + Math.random() * 0.6;
+            }
+            
+            star.style.left = `${x * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.animationDelay = `${Math.random() * 3}s`;
+            star.style.animationDuration = `${Math.random() * 2 + 1}s`;
+            starsContainer.appendChild(star);
+        }
+    }
+    createStars();
+</script>
+
 <div class="container">
     <header>
-        <h1>🎬🎨 Кинопоиск по настроению</h1>
+        <h1>🎬🎨 Кинопоиск по настроению </h1>
         <p> </p>
     </header>
-    <nav>
+<nav style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+    <div class="nav-links" style="display: flex; gap: 20px; flex-wrap: wrap;">
         <a href="{{ url_for('index') }}">🏠 Главная</a>
         <a href="{{ url_for('movies_list') }}">🎥 Фильмы</a>
         <a href="{{ url_for('colors_list') }}">🎨 Цвета</a>
-    </nav>
+    </div>
+    
+    <form action="{{ url_for('movies_search_desc') }}" method="get" style="flex: 1; 
+    display: flex; justify-content: center; gap: 10px; min-width: 200px;">
+        <input type="text" 
+               name="query" 
+               placeholder="Поиск по описанию..." 
+               style="width: 400px; 
+                      max-width: 70vw;
+                      padding: 8px 18px; 
+                      border-radius: 40px; 
+                      border: 1px solid rgba(255,255,255,0.4); 
+                      background: rgba(0,0,0,0.6); 
+                      color: white; 
+                      font-size: 0.95rem;
+                      outline: none;
+                      transition: all 0.3s;">
+        <button type="submit" class="button" style="padding: 6px 18px;">🔍</button>
+    </form>
+    <div style="width: 180px; visibility: hidden;"></div>
+</nav>
     <main>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash {{ category }}">{{ message }}</div>
+                {% for cat, msg in messages %}
+                    <div class="flash {{ cat }}">{{ msg }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
         {% block content %}{% endblock %}
     </main>
-
+    <footer>
+        
+    </footer>
 </div>
 </body>
 </html>

@@ -7,30 +7,93 @@
     <a href="{{ url_for('colors_search') }}" class="button">🔍 Поиск по тегу</a>
 </div>
 <hr>
+
 {% if colors %}
-    {% for color in colors %}
-    <div class="card">
-        <div class="color-name" style="display: flex; align-items: center; gap: 10px;">
-            <span style="display: inline-block; width: 40px; height: 40px; background-color: {{ color.name }}; border: 1px solid #ccc; border-radius: 8px;"></span>
-            <strong>{{ color.name }}</strong>
-        </div>
-        <div>
-            🏷️ Теги:
-            {% for t in color.tags %}
-                <span class="tag">{{ t }}</span>
-            {% endfor %}
-        </div>
-        {% if color.tags %}
-        <div style="margin-top: 12px;">
-            <a href="{{ url_for('movies_search_tags', tags=color.tags|join(' ')) }}" 
-               class="button" style="background: #4a5568; padding: 4px 12px; font-size: 0.8rem;">
-                🎬 Найти фильмы с этими тегами
-            </a>
-        </div>
-        {% endif %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+        {% set color_map = {
+        'красный': '#FF0000',
+        'зеленый': '#00FF00',
+        'синий': '#0000FF',
+        'желтый': '#FFFF00',
+        'черный': '#000000',
+        'белый': '#FFFFFF',
+        'серый': '#808080',
+        'оранжевый': '#FFA500',
+        'фиолетовый': '#800080',
+        'розовый': '#FFC0CB',
+        'коричневый': '#A52A2A',
+        'голубой': '#00FFFF',
+        'салатовый': '#7FFF00',
+        'лайм': '#00FF00',
+        'бордовый': '#800000',
+        'бирюзовый': '#40E0D0',
+        'золотой': '#FFD700'
+        } %}
+        {% for color in colors %}
+            {% if color.tags %}
+                <a href="{{ url_for('movies_search_tags', tags=color.tags|join(',')) }}"
+                   style="text-decoration: none; color: inherit; display: block;">
+                    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;">
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
+                            <div style="width: 60px; 
+                            height: 60px; 
+                            background-color: {{ color_map.get(color.name, '#555555') }}; 
+                            border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); 
+                            box-shadow: 0 0 8px rgba(0,0,0,0.3);"></div>
+                            <strong style="font-size: 1.3rem;">{{ color.name }}</strong>
+                        </div>
+                        <div style="margin-top: 10px;">     
+                            <span style="font-weight: bold;">🏷️ Теги:</span>
+                            <div style="margin-top: 5px;">
+                                {% for t in color.tags %}
+                                    <span class="tag">{{ t }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; font-size: 0.8rem; color: #4a90e2;">🔍 Найти фильмы →</div>
+                    </div>
+                </a>
+            {% else %}
+                <div class="card">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
+                        <div style="width: 60px; height: 60px; 
+                        background-color: {{ color_map.get(color.name, '#555555') }}; 
+                        border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.3);"></div>
+                        <strong style="font-size: 1.3rem;">{{ color.name }}</strong>
+                    </div>
+                    <div><span style="font-weight: bold;">🏷️ Теги:</span> отсутствуют</div>
+                </div>
+            {% endif %} 
+        {% endfor %}
     </div>
-    {% endfor %}
+
 {% else %}
     <p>База цветов пуста. Добавьте первый цвет.</p>
 {% endif %}
+
+<style>
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        border-color: rgba(255,255,255,0.5);
+    }
+    .tag {
+        display: inline-block;
+        background: rgba(74, 144, 226, 0.7);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        margin-right: 6px;
+        margin-bottom: 6px;
+        color: white;
+    }
+    @media (max-width: 600px) {
+        .card {
+            padding: 15px;
+        }
+        .tag {
+            font-size: 0.7rem;
+        }
+    }
+</style>
 {% endblock %}

@@ -1,18 +1,28 @@
 {% extends "base.html" %}
-{% block title %}Главная{% endblock %}
+{% block title %}Главная - Кинопоиск по настроению{% endblock %}
 {% block content %}
-<h2>Добро пожаловать!</h2>
-<p>Выберите раздел для работы:</p>
-<div style="display: flex; gap: 20px; margin-top: 30px;">
-    <div class="card" style="flex:1; text-align: center;">
-        <h3>🎥 Фильмы</h3>
-        <p>Добавляйте фильмы вручную или через TMDB, ищите по тегам и смыслу описания.</p>
-        <a href="{{ url_for('movies_list') }}" class="button">Перейти</a>
-    </div>
-    <div class="card" style="flex:1; text-align: center;">
-        <h3>🎨 Цвета</h3>
-        <p>Ведите базу цветов с тегами, ищите цвета по ключевым словам.</p>
-        <a href="{{ url_for('colors_list') }}" class="button">Перейти</a>
-    </div>
+<h2>✨ Добро пожаловать в звёздный каталог ✨</h2>
+<p>Выберите раздел в меню или вдохновитесь случайными постерами:</p>
+
+<div class="random-posters">
+    {% if random_movies %}
+        {% for movie in random_movies %}
+        <div class="poster-card">
+            {% if movie.poster_path %}
+                <img src="{{ get_poster_url(movie.poster_path, 'w200') }}" alt="{{ movie.title }}">
+            {% else %}
+                <img src="https://via.placeholder.com/130x180?text=Нет+постера" alt="нет постера">
+            {% endif %}
+            <p style="margin-top: 8px; font-size: 0.8rem;">{{ movie.title[:20] }}</p>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>Пока нет фильмов с постерами. Добавьте фильмы через TMDB.</p>
+    {% endif %}
+</div>
+
+<div style="margin-top: 40px; text-align: center;">
+    <a href="{{ url_for('movies_list') }}" class="button">🎬 Перейти к фильмам</a>
+    <a href="{{ url_for('colors_list') }}" class="button" style="margin-left: 15px;">🎨 Перейти к цветам</a>
 </div>
 {% endblock %}
