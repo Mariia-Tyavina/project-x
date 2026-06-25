@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html lang="ru" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>table_movie module &#8212; документация Кинопоиск по настроению 1</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=47a0e12c"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/translations.js?v=cd1d70c9"></script>
+    <link rel="index" title="Алфавитный указатель" href="genindex.html" />
+    <link rel="search" title="Поиск" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-table_movie">
+<span id="table-movie-module"></span><h1>table_movie module<a class="headerlink" href="#module-table_movie" title="Ссылка на этот заголовок">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="table_movie.MovieManager">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">table_movie.</span></span><span class="sig-name descname"><span class="pre">MovieManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'movies.db'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#table_movie.MovieManager" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Базовые классы: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Класс для управления фильмами: добавление, поиск, индексирование.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="table_movie.MovieManager.add_movie">
+<span class="sig-name descname"><span class="pre">add_movie</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">director</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rating</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poster_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#table_movie.MovieManager.add_movie" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Добавляет новый фильм в базу данных и связывает его с тегами.</p>
+<dl class="simple">
+<dt>Аргументы:</dt><dd><p>title (str): Название фильма.
+year (int): Год выпуска.
+director (str): Режиссёр.
+description (str): Описание.
+rating (float): Рейтинг (0–10).
+tags (List[str]): Список тегов.
+poster_path (str, optional): Относительный путь к постеру.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="table_movie.MovieManager.create_search_index">
+<span class="sig-name descname"><span class="pre">create_search_index</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#table_movie.MovieManager.create_search_index" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Создаёт FAISS-индекс для семантического поиска по описаниям фильмов.
+Индекс сохраняется в файл „movie_search.index“.
+Использует модель SentenceTransformer для генерации эмбеддингов.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="table_movie.MovieManager.get_all_movies">
+<span class="sig-name descname"><span class="pre">get_all_movies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#table_movie.MovieManager.get_all_movies" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Возвращает все фильмы из базы, отсортированные по рейтингу (убывание).
+Каждый фильм содержит поле „tags“ со списком тегов.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="table_movie.MovieManager.init_database">
+<span class="sig-name descname"><span class="pre">init_database</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#table_movie.MovieManager.init_database" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Создаёт таблицы movies, tags, movie_tags, если они отсутствуют.
+Также добавляет колонку poster_path, если её ещё нет.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="table_movie.MovieManager.movie_exists">
+<span class="sig-name descname"><span class="pre">movie_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#table_movie.MovieManager.movie_exists" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Проверяет, существует ли уже фильм с таким названием и годом.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="table_movie.MovieManager.search_by_index">
+<span class="sig-name descname"><span class="pre">search_by_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#table_movie.MovieManager.search_by_index" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Выполняет гибридный поиск: сначала точное совпадение подстроки
+в названии или описании (регистронезависимо), затем семантический
+поиск через FAISS. Результаты объединяются без дубликатов.</p>
+<dl class="simple">
+<dt>Аргументы:</dt><dd><p>query (str): Поисковый запрос.
+amount (int): Максимальное количество возвращаемых фильмов.</p>
+</dd>
+<dt>Возвращает:</dt><dd><p>List[Dict]: Список фильмов с полем similarity_score.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="table_movie.MovieManager.search_by_tags">
+<span class="sig-name descname"><span class="pre">search_by_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_all</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#table_movie.MovieManager.search_by_tags" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Ищет фильмы по списку тегов.</p>
+<dl>
+<dt>Аргументы:</dt><dd><p>tags (List[str]): Список тегов для поиска.
+match_all (bool): Если True, фильм должен содержать все теги;</p>
+<blockquote>
+<div><p>если False — достаточно любого из них.</p>
+</div></blockquote>
+</dd>
+<dt>Возвращает:</dt><dd><p>List[Dict]: Список фильмов, каждый содержит поля и теги.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="table_movie.MovieManager.search_by_tmdb">
+<span class="sig-name descname"><span class="pre">search_by_tmdb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">searching</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#table_movie.MovieManager.search_by_tmdb" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Ищет фильм на TMDB по названию и добавляет первый результат в базу.</p>
+<dl class="simple">
+<dt>Аргументы:</dt><dd><p>searching (str): Название фильма для поиска.</p>
+</dd>
+<dt>Возвращает:</dt><dd><p>tuple (bool, str): (успех, сообщение).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="table_movie.MovieManager.show_index_results">
+<span class="sig-name descname"><span class="pre">show_index_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#table_movie.MovieManager.show_index_results" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Выводит в консоль результаты семантического поиска (для отладки).</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Кинопоиск по настроению</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Навигация</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Masha_Artem_Egor.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/table_movie.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
