@@ -38,18 +38,13 @@
     {% endfor %}
 
     <!-- Пагинация -->
-    <div style="margin-top: 30px; 
-    text-align: center; 
-    display: flex; justify-content: center; 
-    gap: 15px; 
-    flex-wrap: wrap;">
+    <div style="margin-top: 30px; text-align: center; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
         {% if page > 1 %}
-            <a href="?page={{ page-1 }}" class="button">← Предыдущая</a>
+            <a href="{{ url_for('movies_search_desc', query=query, page=page-1) }}" class="button">← Предыдущая</a>
         {% endif %}
-        <span style="background: rgba(255,255,255,0.1); 
-        padding: 6px 16px; border-radius: 30px;">{{ page }} / {{ total_pages }}</span>
+        <span style="background: rgba(255,255,255,0.1); padding: 6px 16px; border-radius: 30px;">{{ page }} / {{ total_pages }}</span>
         {% if page < total_pages %}
-            <a href="?page={{ page+1 }}" class="button">Следующая →</a>
+            <a href="{{ url_for('movies_search_desc', query=query, page=page+1) }}" class="button">Следующая →</a>
         {% endif %}
     </div>
 {% else %}
