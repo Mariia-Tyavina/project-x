@@ -14,7 +14,7 @@ from sentence_transformers import SentenceTransformer
 # Загружаем переменные окружения из .env (ключ TMDB_API)
 load_dotenv()
 
-# Глобальная модель SentenceTransformer для получения эмбеддингов текстов
+#глобальная модель SentenceTransformer для получения эмбеддингов текста
 model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 
 
@@ -26,7 +26,7 @@ class MovieManager:
     def __init__(self, db_file: str = "movies.db"):
         """
         Инициализация менеджера с указанием файла базы данных.
-        Если база не существует, она будет создана с необходимыми таблицами.
+        Если база не существует, она будет создана.
         """
         self.db_file = db_file
         self.init_database()
@@ -108,7 +108,7 @@ class MovieManager:
 
             movie_id = cursor.lastrowid
             
-            # Для каждого тега — либо находим существующий, либо создаём новый
+            #для каждого тега находим существующий, или создаём новый
             for tag_name in tags:
                 cursor.execute(
                     "INSERT OR IGNORE INTO tags (name) VALUES (?)", 
@@ -134,9 +134,9 @@ class MovieManager:
         Ищет фильмы по списку тегов.
 
         Аргументы:
-            tags (List[str]): Список тегов для поиска.
-            match_all (bool): Если True, фильм должен содержать все теги;
-                              если False — достаточно любого из них.
+        tags (List[str]): Список тегов для поиска.
+        match_all (bool): Если True, фильм должен содержать все теги;
+                            если False — достаточно любого из них.
 
         Возвращает:
             List[Dict]: Список фильмов, каждый содержит поля и теги.
@@ -189,7 +189,8 @@ class MovieManager:
 
     def get_all_movies(self) -> List[Dict]:
         """
-        Возвращает все фильмы из базы, отсортированные по рейтингу (убывание).
+        Возвращает все фильмы из базы, 
+        отсортированные по рейтингу (убывание).
         Каждый фильм содержит поле 'tags' со списком тегов.
         """
         with sqlite3.connect(self.db_file) as conn:
@@ -231,7 +232,8 @@ class MovieManager:
 
     def search_by_tmdb(self, searching: str):
         """
-        Ищет фильм на TMDB по названию и добавляет первый результат в базу.
+        Ищет фильм на TMDB по названию 
+        и добавляет первый результат в базу.
 
         Аргументы:
             searching (str): Название фильма для поиска.
@@ -258,7 +260,10 @@ class MovieManager:
             movie = results[0]
             movie_id = movie['id']
 
-            # 2) Получение расширенной информации (режиссёр, жанры, постер)
+            '''
+            2)получение расширенной 
+            информации режиссёр, жанры, постер
+            ''' 
             details_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
             params = {"api_key": API_KEY, 
                       "language": "ru-RU", 
@@ -305,9 +310,11 @@ class MovieManager:
         
     def create_search_index(self):
         """
-        Создаёт FAISS-индекс для семантического поиска по описаниям фильмов.
+        Создаёт FAISS-индекс для семантического поиска 
+        по описаниям фильмов.
         Индекс сохраняется в файл 'movie_search.index'.
-        Использует модель SentenceTransformer для генерации эмбеддингов.
+        Использует модель SentenceTransformer 
+        для генерации эмбеддингов.
         """
         all_movies = self.get_all_movies()
         if not all_movies:
@@ -317,7 +324,7 @@ class MovieManager:
         descriptions = []
         movie_ids = []
         for movie in all_movies:
-            # Для индекса берём описание, если оно есть, иначе — название
+            # Для индекса берём описание, если оно есть, иначе название
             description = movie.get("description", '')
             if not description or description == "Нет описания":
                 description = movie.get('title', '')
@@ -331,7 +338,10 @@ class MovieManager:
         )
         vector_dimension = description_embeddings.shape[1]
 
-        #Создаём индекс FAISS внутреннее произведение, нормализованные векторы
+        '''
+        cоздаём индекс FAISS внутреннее произведение, 
+        нормализованные векторы
+        '''
         index = faiss.IndexFlatIP(vector_dimension)
         index_with_ids = faiss.IndexIDMap(index)
         faiss.normalize_L2(description_embeddings)
@@ -343,8 +353,9 @@ class MovieManager:
     def search_by_index(self, query: str, amount = 5):
         """
         Выполняет гибридный поиск: сначала точное совпадение подстроки
-        в названии или описании (регистронезависимо), затем семантический
-        поиск через FAISS. Результаты объединяются без дубликатов.
+        в названии или описании (регистронезависимо), 
+        затем семантический поиск через FAISS. 
+        Результаты объединяются без дубликатов.
 
         Аргументы:
             query (str): Поисковый запрос.
@@ -356,7 +367,8 @@ class MovieManager:
         # Точное совпадение по подстроке (регистронезависимо)
         exact_matches = []
         lower_query = query.lower()
-        all_movies = self.get_all_movies()  # получаем все фильмы с тегами
+        # получаем все фильмы с тегами
+        all_movies = self.get_all_movies()  
 
         for movie in all_movies:
             title_lower = movie['title'].lower()
@@ -402,7 +414,8 @@ class MovieManager:
 
     def show_index_results(self, results: list, query: str):
         """
-        Выводит в консоль результаты семантического поиска (для отладки).
+        Выводит в консоль результаты семантического поиска
+        (для отладки).
         """        
         if not results:
             print(f"\nПо запросу '{query}' ничего не найдено")

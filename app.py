@@ -16,8 +16,8 @@ def get_poster_url(poster_path, size='w342'):
     Возвращает полный URL постера фильма из TMDB.
 
     Аргументы:
-        poster_path (str): Относительный путь к постеру (например, '/abc.jpg').
-        size (str): Размер изображения (по умолчанию 'w342').
+    poster_path (str): путь к постеру (например, '/abc.jpg').
+    size (str): Размер изображения (по умолчанию 'w342').
 
     Возвращает:
         str: Полный URL или None, если poster_path отсутствует.
@@ -157,7 +157,7 @@ def movies_search_tags():
         page=page,
         total_pages=total_pages,
         total=total,
-        search_type='tags' # указываем тип поиска для отображения кнопок
+        search_type='tags' 
     )
 
 
